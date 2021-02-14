@@ -3,35 +3,33 @@ package com.company;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ServerConnection implements Runnable {
-    private Socket server;
+    private Socket serverSocket;
     private BufferedReader in;
-    private PrintWriter out;
 
     public ServerConnection(Socket s){
-        server = s;
+        serverSocket = s;
         try {
-            in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            out = new PrintWriter(server.getOutputStream(),true);
+            in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Exception in ServerConnection");
+            System.out.println(e.getStackTrace());
         }
     }
 
     @Override
     public void run() {
-        String message = null;
+        String msg = null;
         try {
         while (true) {
-            message = in.readLine();
-            System.out.println("Server say: " + message);
+            msg = in.readLine();
+            System.out.printf("Server say: %s \n>", msg );
         }
         }catch (Exception e){
-
+            System.out.println("Exception in @run ServerConnection");
+            System.out.println(e.getStackTrace());
         }
     }
 }

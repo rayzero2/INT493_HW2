@@ -15,6 +15,7 @@ public class Client {
         clientSocket.connect(new InetSocketAddress(IP, 8080));
         System.out.printf("connected form port %d\n",
                 clientSocket.getLocalPort());
+
         ServerConnection serverCon = new ServerConnection(clientSocket);
 
         Scanner scIn2 = new Scanner(System.in);
@@ -22,16 +23,12 @@ public class Client {
         new Thread(serverCon).start();
 
         while (true) {
-
             System.out.print(">");
-            String mess = scIn2.nextLine();
-            if (mess.equalsIgnoreCase("exit")) {
-                String data = mess + "\n";
-                clientSocket.getOutputStream().write(data.getBytes());
-                clientSocket.getOutputStream().flush();
+            String msg = scIn2.nextLine();
+            if (msg.equalsIgnoreCase("exit")) {
                 break;
             }
-            String data = mess + "\n";
+            String data = msg + "\n";
             clientSocket.getOutputStream().write(data.getBytes());
             clientSocket.getOutputStream().flush();
 //            ===================move to serverConnection==================

@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private static ArrayList<ClientHandler> clients = new ArrayList<>();
-    private static ExecutorService pool = Executors.newFixedThreadPool(5);
+    private static ArrayList<ClientHandler> clients = new ArrayList<>(); //store every clients
+    private static ExecutorService pool = Executors.newFixedThreadPool(5); //Thread pool for preallocate
 
     public static void main(String[] args) {
 
@@ -18,7 +18,7 @@ public class Server {
             serverSocket.bind(new InetSocketAddress(8080), 4096);
             System.out.println("Wait for client connected");
             while (true) {
-                Socket clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept(); //accept
                 System.out.printf("Client connected %s:%d\n",
                         clientSocket.getInetAddress().getHostAddress(),
                         clientSocket.getPort());
@@ -27,7 +27,8 @@ public class Server {
                 pool.execute(clientThread);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Exception in Server main");
+            System.out.println(e.getStackTrace());
         }
     }
 }
@@ -48,46 +49,40 @@ class  ClientHandler implements Runnable {
             Scanner sc = new Scanner(clientSocket.getInputStream());
 
             while (sc.hasNextLine()) {
-                String mess = sc.nextLine();
-                System.out.printf("Got %s form %s:%d\n", mess, clientSocket.getInetAddress().getHostAddress(),
+                String msg = sc.nextLine();
+                System.out.printf("Got %s form %s:%d\n",
+                        msg,
+                        clientSocket.getInetAddress().getHostAddress(),
                         clientSocket.getPort());
-                String data;
-//                if(mess.equalsIgnoreCase("exit")) { //catch exit
-//                    data = String.format("Logout TIME:%d\n",
-//                            System.currentTimeMillis());
-//                    clientSocket.getOutputStream().write(data.getBytes());
-//                    clientSocket.close();
-//                } else
-                if (mess.startsWith("say")){
-                    int firstSpace = mess.indexOf(" ");
+                if(msg.equalsIgnoreCase("exit")) { //catch exit
+                    clientSocket.close();
+                } else if (msg.startsWith("say")){ //catch cmd say for test
+                    int firstSpace = msg.indexOf(" ");
                     if (firstSpace != -1) {
-                        broadcast( mess.substring(firstSpace+1));
+                        broadcast( msg.substring(firstSpace+1));
                     }
                 } else {
-
-                    clientSocket.getOutputStream().write((mess+"\n").getBytes());
+                    broadcast(msg);
                 }
                 clientSocket.getOutputStream().flush();
             }
-//        read/write to clientSocket
-            System.out.printf("Stream End for %s:%d\n",clientSocket.getInetAddress().getHostAddress(),
+            System.out.printf("Stream End for %s:%d\n",
+                    clientSocket.getInetAddress().getHostAddress(),
                     clientSocket.getPort());
             clientSocket.close();
         } catch (Exception e){
-            //do nothing
+            System.out.println("Exception in ClientHandler");
+            System.out.println(e.getStackTrace());
         }
     }
 
-
-
-    private void broadcast(String mess) {
+    private void broadcast(String msg) {
         try {
             for (ClientHandler aClient : clients) {
-                aClient.clientSocket.getOutputStream().write((mess+"\n").getBytes());
+                aClient.clientSocket.getOutputStream().write((msg+"\n").getBytes());
                 aClient.clientSocket.getOutputStream().flush();
             }
         }catch (Exception e){
-
         }
     }
 }
