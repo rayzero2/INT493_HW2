@@ -27,8 +27,6 @@ public class Server {
                 pool.execute(clientThread);
             }
         } catch (Exception e) {
-            System.out.println("Exception in Server main");
-            System.out.println(e.getStackTrace());
         }
     }
 }
@@ -47,7 +45,6 @@ class  ClientHandler implements Runnable {
     public void run() {
         try {
             Scanner sc = new Scanner(clientSocket.getInputStream());
-
             while (sc.hasNextLine()) {
                 String msg = sc.nextLine();
                 System.out.printf("Got %s form %s:%d\n",
@@ -55,7 +52,10 @@ class  ClientHandler implements Runnable {
                         clientSocket.getInetAddress().getHostAddress(),
                         clientSocket.getPort());
                 if(msg.equalsIgnoreCase("exit")) { //catch exit
-                    clientSocket.close();
+                    System.out.printf("Stream End for %s:%d\n",
+                            clientSocket.getInetAddress().getHostAddress(),
+                            clientSocket.getPort());
+                    break;
                 } else if (msg.startsWith("say")){ //catch cmd say for test
                     int firstSpace = msg.indexOf(" ");
                     if (firstSpace != -1) {
@@ -66,19 +66,17 @@ class  ClientHandler implements Runnable {
                 }
                 clientSocket.getOutputStream().flush();
             }
-            System.out.printf("Stream End for %s:%d\n",
-                    clientSocket.getInetAddress().getHostAddress(),
-                    clientSocket.getPort());
             clientSocket.close();
         } catch (Exception e){
-            System.out.println("Exception in ClientHandler");
-            System.out.println(e.getStackTrace());
         }
     }
 
     private void broadcast(String msg) {
         try {
             for (ClientHandler aClient : clients) {
+                int i = 0;
+                System.out.print(i);
+                i++;
                 aClient.clientSocket.getOutputStream().write((msg+"\n").getBytes());
                 aClient.clientSocket.getOutputStream().flush();
             }

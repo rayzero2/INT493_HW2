@@ -26,6 +26,9 @@ public class Client {
             System.out.print(">");
             String msg = scIn2.nextLine();
             if (msg.equalsIgnoreCase("exit")) {
+                String data = msg + "\n";
+                clientSocket.getOutputStream().write(data.getBytes());
+                clientSocket.getOutputStream().flush();
                 break;
             }
             String data = msg + "\n";
